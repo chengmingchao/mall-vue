@@ -3,6 +3,7 @@
     :title="!dataForm.id ? '新增' : '修改'"
     :close-on-click-modal="false"
     :visible.sync="visible"
+    @closed="dialogClosed"
   >
     <el-form
       :model="dataForm"
@@ -150,6 +151,9 @@ export default {
     };
   },
   methods: {
+     dialogClosed() {
+      this.imageUrl = '';
+    },
     init(id) {
       this.dataForm.brandId = id || 0;
       this.visible = true;

@@ -61,8 +61,11 @@
         align="center"
         label="品牌logo地址"
       >
-      <template slot-scope="scope">
-          <img :src="scope.row.logo" style="width: 100px; height: 80px"/>
+        <template slot-scope="scope">
+          <img
+            :src="scope.row.logo"
+            style="width: 100px; height: 80px"
+          />
         </template>
       </el-table-column>
       <el-table-column
@@ -115,6 +118,11 @@
           <el-button
             type="text"
             size="small"
+            @click="updateCatelogHandle(scope.row.brandId)"
+          >关联分类</el-button>
+          <el-button
+            type="text"
+            size="small"
             @click="addOrUpdateHandle(scope.row.brandId)"
           >修改</el-button>
           <el-button
@@ -141,11 +149,79 @@
       ref="addOrUpdate"
       @refreshDataList="getDataList"
     ></add-or-update>
+
+    <el-dialog
+      title="关联分类"
+      :visible.sync="cateRelationDialogVisible"
+      width="30%"
+    >
+      <el-popover
+        placement="right-end"
+        v-model="popCatelogSelectVisible"
+      >
+        <category-cascader :catelogPath.sync="catelogPath"></category-cascader>
+        <div style="text-align: right; margin: 0">
+          <el-button
+            size="mini"
+            type="text"
+            @click="popCatelogSelectVisible = false"
+          >取消</el-button>
+          <el-button
+            type="primary"
+            size="mini"
+            @click="addCatelogSelect"
+          >确定</el-button>
+        </div>
+        <el-button slot="reference">新增关联</el-button>
+      </el-popover>
+      <el-table
+        :data="cateRelationTableData"
+        style="width: 100%"
+      >
+        <el-table-column
+          prop="id"
+          label="#"
+        ></el-table-column>
+        <el-table-column
+          prop="brandName"
+          label="品牌名"
+        ></el-table-column>
+        <el-table-column
+          prop="catelogName"
+          label="分类名"
+        ></el-table-column>
+        <el-table-column
+          fixed="right"
+          header-align="center"
+          align="center"
+          label="操作"
+        >
+          <template slot-scope="scope">
+            <el-button
+              type="text"
+              size="small"
+              @click="deleteCateRelationHandle(scope.row.id,scope.row.brandId)"
+            >移除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="cateRelationDialogVisible = false">取 消</el-button>
+        <el-button
+          type="primary"
+          @click="cateRelationDialogVisible = false"
+        >确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import AddOrUpdate from "./brand-add-or-update";
+import CategoryCascader from "../common/category-cascader";
 export default {
   data() {
     return {
@@ -159,15 +235,71 @@ export default {
       dataListLoading: false,
       dataListSelections: [],
       addOrUpdateVisible: false,
+      cateRelationDialogVisible: false,
+      popCatelogSelectVisible: false,
+      cateRelationTableData: [],
+        catelogPath: [],
     };
   },
   components: {
     AddOrUpdate,
+     CategoryCascader
   },
   activated() {
     this.getDataList();
   },
   methods: {
+    deleteCateRelationHandle(id, brandId) {
+      this.$http({
+        url: this.$http.adornUrl("/product/categorybrandrelation/delete"),
+        method: "post",
+        data: this.$http.adornData([id], false),
+      }).then(({ data }) => {
+        this.getCateRelation();
+      });
+    },
+    addCatelogSelect() {
+      //{"brandId":1,"catelogId":2}
+      this.popCatelogSelectVisible = false;
+      this.$http({
+        url: this.$http.adornUrl("/product/categorybrandrelation/save"),
+        method: "post",
+        data: this.$http.adornData(
+          {
+            brandId: this.brandId,
+            catelogId: this.catelogPath[this.catelogPath.length - 1],
+          },
+          false
+        ),
+      }).then(({ data }) => {
+        this.getCateRelation();
+      });
+    },
+    deleteCateRelationHandle(id, brandId) {
+      this.$http({
+        url: this.$http.adornUrl("/product/categorybrandrelation/delete"),
+        method: "post",
+        data: this.$http.adornData([id], false),
+      }).then(({ data }) => {
+        this.getCateRelation();
+      });
+    },
+    updateCatelogHandle(brandId) {
+      this.cateRelationDialogVisible = true;
+      this.brandId = brandId;
+      this.getCateRelation();
+    },
+    getCateRelation() {
+      this.$http({
+        url: this.$http.adornUrl("/product/categorybrandrelation/list"),
+        method: "get",
+        params: this.$http.adornParams({
+          brandId: this.brandId,
+        }),
+      }).then(({ data }) => {
+        this.cateRelationTableData = data.data;
+      });
+    },
     // 获取数据列表
     getDataList() {
       this.dataListLoading = true;
@@ -178,7 +310,7 @@ export default {
           {
             pageNum: this.pageIndex,
             pageSize: this.pageSize,
-            name: this.dataForm.key,
+            key: this.dataForm.key,
           },
           false
         ),
@@ -194,25 +326,24 @@ export default {
       });
     },
     //状态更新
-    brandUpdateStatus(data){
-      let {brandId,showStatus}=data
-       this.$http({
+    brandUpdateStatus(data) {
+      let { brandId, showStatus } = data;
+      this.$http({
         url: this.$http.adornUrl("/product/brand/update"),
         method: "post",
-        data: this.$http.adornData({brandId,showStatus}, false),
+        data: this.$http.adornData({ brandId, showStatus }, false),
       }).then(({ data }) => {
-        if(data.code===0){
+        if (data.code === 0) {
           this.$message({
-            type:'success',
-            message:'状态更新成功'
-          })
-        }else{
+            type: "success",
+            message: "状态更新成功",
+          });
+        } else {
           this.$message({
-            type:'error',
-            message:'状态更新失败'
-          })
+            type: "error",
+            message: "状态更新失败",
+          });
         }
-       
       });
     },
     // 每页数
