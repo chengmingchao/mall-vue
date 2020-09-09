@@ -96,6 +96,7 @@
             label="操作"
           >
             <template slot-scope="scope">
+              <el-button type="text" size="small" @click="relationHandle(scope.row.attrGroupId)">关联</el-button>
               <el-button
                 type="text"
                 size="small"
@@ -125,6 +126,8 @@
           ref="addOrUpdate"
           @refreshDataList="getDataList"
         ></add-or-update>
+         <!-- 修改关联关系 -->
+        <relation-update v-if="relationVisible" ref="relationUpdate" @refreshData="getDataList"></relation-update>
       </div>
     </el-col>
 
@@ -134,8 +137,9 @@
 <script>
 import Category from "../common/category";
 import AddOrUpdate from "./attrgroup-add-or-update";
+import RelationUpdate from "./attr-group-relation";
 export default {
-  components: { Category, AddOrUpdate },
+  components: { Category, AddOrUpdate,RelationUpdate},
   data() {
     return {
       catId: 0,
@@ -149,14 +153,21 @@ export default {
       dataListLoading: false,
       dataListSelections: [],
       addOrUpdateVisible: false,
+      relationVisible: false
     };
   },
   activated() {
     this.getDataList();
   },
   methods: {
+      //处理分组与属性的关联
+    relationHandle(groupId) {
+      this.relationVisible = true;
+      this.$nextTick(() => {
+        this.$refs.relationUpdate.init(groupId);
+      });
+    },
     treeNodeClick(data, node, component) {
-      console.log("感知到点击：", data, node, component);
       if (node.level === 3) {
         this.catId = data.catId;
         this.getDataList();
@@ -176,7 +187,7 @@ export default {
       }).then(({ data }) => {
         if (data && data.code === 0) {
           this.dataList = data.data.list;
-          this.totalPage = data.data.totalPage;
+          this.totalPage = data.data.total;
         } else {
           this.dataList = [];
           this.totalPage = 0;

@@ -49,11 +49,29 @@
               </el-input-number>
             </el-form-item>
             <el-form-item label="商品介绍" prop="decript">
-              <multi-upload v-model="spu.decript"></multi-upload>
+               <el-upload class="avatar-uploader" action="upload"  :show-file-list="false"  :http-request="uploadSectionFile" >
+          <img v-if="imageUrl"  :src="imageUrl" class="avatar" >
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+        </el-upload>
             </el-form-item>
 
             <el-form-item label="商品图集" prop="images">
-              <multi-upload v-model="spu.images"></multi-upload>
+               <el-upload
+          class="avatar-uploader"
+          action="upload"
+          :show-file-list="false"
+          :http-request="uploadSectionFile"
+        >
+          <img
+            v-if="imageUrl"
+            :src="imageUrl"
+            class="avatar"
+          >
+          <i
+            v-else
+            class="el-icon-plus avatar-uploader-icon"
+          ></i>
+        </el-upload>
             </el-form-item>
             <el-form-item>
               <el-button type="success" @click="collectSpuBaseInfo">下一步：设置基本参数</el-button>
@@ -351,7 +369,7 @@ import BrandSelect from "../common/brand-select";
 // import MultiUpload from "@/components/upload/multiUpload";
 export default {
   //import引入的组件需要注入到对象中才能使用
-  components: { CategoryCascader, BrandSelect, MultiUpload },
+  components: { CategoryCascader, BrandSelect },
   props: {},
   data() {
     return {
@@ -803,5 +821,28 @@ export default {
   activated() {} //如果页面有keep-alive缓存功能，这个函数会触发
 };
 </script>
-<style scoped>
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409eff;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 160px;
+  height: 160px;
+  line-height: 178px;
+  text-align: center;
+}
+.avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
 </style>
