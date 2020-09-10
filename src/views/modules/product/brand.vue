@@ -238,7 +238,7 @@ export default {
       cateRelationDialogVisible: false,
       popCatelogSelectVisible: false,
       cateRelationTableData: [],
-        catelogPath: [],
+      catelogPath: [],
     };
   },
   components: {

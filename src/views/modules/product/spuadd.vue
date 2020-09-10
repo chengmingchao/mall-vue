@@ -373,6 +373,7 @@ export default {
   props: {},
   data() {
     return {
+      imageUrl: "",
       catPathSub: null,
       brandIdSub: null,
       uploadDialogVisible: false,
@@ -410,12 +411,12 @@ export default {
         brandId: [
           { required: true, message: "请选择一个品牌", trigger: "blur" }
         ],
-        decript: [
-          { required: true, message: "请上传商品详情图集", trigger: "blur" }
-        ],
-        images: [
-          { required: true, message: "请上传商品图片集", trigger: "blur" }
-        ],
+        // decript: [
+        //   { required: true, message: "请上传商品详情图集", trigger: "blur" }
+        // ],
+        // images: [
+        //   { required: true, message: "请上传商品图片集", trigger: "blur" }
+        // ],
         weight: [
           {
             type: "number",
@@ -691,6 +692,7 @@ export default {
           method: "get",
           params: this.$http.adornParams({})
         }).then(({ data }) => {
+          console.log("data:",data)
           //先对表单的baseAttrs进行初始化
           data.data.forEach(item => {
             let attrArray = [];
@@ -795,7 +797,26 @@ export default {
           }
         }
       }
-    }
+    },
+       //上传文件
+    uploadSectionFile(param) {
+      var fileObj = param.file;
+      // FormData 对象
+      var form = new FormData();
+      // 文件对象
+      form.append("file", fileObj);
+      this.$http({
+        url: this.$http.adornUrl("/upload/image/upload"),
+        method: "post",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        data: form,
+      }).then(({ data }) => {
+        this.imageUrl = data.fileUrl;
+        this.dataForm.logo = data.fileUrl;
+      });
+    },
   },
   //生命周期 - 创建完成（可以访问当前this实例）
   created() {},
