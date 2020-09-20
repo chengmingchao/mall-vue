@@ -49,29 +49,30 @@
               </el-input-number>
             </el-form-item>
             <el-form-item label="商品介绍" prop="decript">
-               <el-upload class="avatar-uploader" action="upload"  :show-file-list="false"  :http-request="uploadSectionFile" >
-          <img v-if="imageUrl"  :src="imageUrl" class="avatar" >
-          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-        </el-upload>
+             <el-upload
+  action="upload"
+  list-type="picture-card"
+  :on-preview="handlePictureCardPreview"
+  :on-remove="handleRemove" :http-request="uploadDecriptImages">
+  <i class="el-icon-plus"></i>
+</el-upload>
+<el-dialog :visible.sync="dialogVisible">
+  <img width="100%" :src="decriptImageUrl" alt="">
+</el-dialog>
+              
             </el-form-item>
 
             <el-form-item label="商品图集" prop="images">
                <el-upload
-          class="avatar-uploader"
-          action="upload"
-          :show-file-list="false"
-          :http-request="uploadSectionFile"
-        >
-          <img
-            v-if="imageUrl"
-            :src="imageUrl"
-            class="avatar"
-          >
-          <i
-            v-else
-            class="el-icon-plus avatar-uploader-icon"
-          ></i>
-        </el-upload>
+  action="upload"
+  list-type="picture-card"
+  :on-preview="handlePictureCardPreview"
+  :on-remove="handleRemove" :http-request="uploadImagesImages">
+  <i class="el-icon-plus"></i>
+</el-upload>
+<el-dialog :visible.sync="dialogVisible">
+  <img width="100%" :src="imagesImageUrl" alt="">
+</el-dialog>
             </el-form-item>
             <el-form-item>
               <el-button type="success" @click="collectSpuBaseInfo">下一步：设置基本参数</el-button>
@@ -217,12 +218,19 @@
                 <el-row>
                   <el-col :span="24">
                     <label style="display:block;float:left">选择图集 或</label>
-                    <multi-upload
+                    <!-- <multi-upload
                       style="float:left;margin-left:10px;"
                       :showFile="false"
                       :listType="'text'"
                       v-model="uploadImages"
-                    ></multi-upload>
+                    ></multi-upload> -->
+                    <el-upload
+  action="upload"
+  list-type="picture-card"
+  :on-preview="handlePictureCardPreview"
+  :on-remove="handleRemove" :http-request="uploadImagesImages">
+  <i class="el-icon-plus"></i>
+</el-upload>
                   </el-col>
                   <el-col :span="24">
                     <el-divider></el-divider>
@@ -373,10 +381,11 @@ export default {
   props: {},
   data() {
     return {
-      imageUrl: "",
+      decriptImageUrl: "",
+      imagesImageUrl:'',
       catPathSub: null,
       brandIdSub: null,
-      uploadDialogVisible: false,
+      dialogVisible: false,
       uploadImages: [],
       step: 0,
       //spu_name  spu_description  catalog_id  brand_id  weight  publish_status
@@ -465,6 +474,13 @@ export default {
   },
   //方法集合
   methods: {
+     handleRemove(file, fileList) {
+        console.log(file, fileList);
+      },
+      handlePictureCardPreview(file) {
+        this.imagesImageUrl = file.url;
+        this.dialogVisible = true;
+      },
     addAgian() {
       this.step = 0;
       this.resetSpuData();
@@ -536,6 +552,7 @@ export default {
       this.inputVisible[idx].view = false;
       this.inputValue[idx].val = "";
     },
+    //设置基本参数
     collectSpuBaseInfo() {
       //spuBaseForm
       this.$refs.spuBaseForm.validate(valid => {
@@ -547,6 +564,7 @@ export default {
         }
       });
     },
+    //生成销售属性
     generateSaleAttrs() {
       //把页面绑定的所有attr处理到spu里面,这一步都要做
       this.spu.baseAttrs = [];
@@ -567,6 +585,8 @@ export default {
       this.step = 2;
       this.getShowSaleAttr();
     },
+
+    //生成sku信息
     generateSkus() {
       this.step = 3;
 
@@ -600,6 +620,7 @@ export default {
           attrArray.push(saleAttrItem);
         });
         //先初始化几个images，后面的上传还要加
+        console.log("images:",this.spu.images)
         let imgs = [];
         this.spu.images.forEach((img, idx) => {
           imgs.push({ imgUrl: "", defaultImg: 0 });
@@ -665,12 +686,13 @@ export default {
           ),
           method: "get",
           params: this.$http.adornParams({
-            page: 1,
-            limit: 500
+            pageNum: 1,
+            pageSize: 500
           })
         }).then(({ data }) => {
-          this.dataResp.saleAttrs = data.page.list;
-          data.page.list.forEach(item => {
+          console.log("data1:",data)
+          this.dataResp.saleAttrs = data.data.list;
+          data.data.list.forEach(item => {
             this.dataResp.tempSaleAttrs.push({
               attrId: item.attrId,
               attrValues: [],
@@ -683,6 +705,7 @@ export default {
         });
       }
     },
+
     showBaseAttrs() {
       if (!this.dataResp.steped[0]) {
         this.$http({
@@ -692,7 +715,7 @@ export default {
           method: "get",
           params: this.$http.adornParams({})
         }).then(({ data }) => {
-          console.log("data:",data)
+          console.log("showBaseAttrs:",data)
           //先对表单的baseAttrs进行初始化
           data.data.forEach(item => {
             let attrArray = [];
@@ -798,8 +821,8 @@ export default {
         }
       }
     },
-       //上传文件
-    uploadSectionFile(param) {
+       //上传商品介绍图片
+    uploadDecriptImages(param) {
       var fileObj = param.file;
       // FormData 对象
       var form = new FormData();
@@ -813,8 +836,28 @@ export default {
         },
         data: form,
       }).then(({ data }) => {
-        this.imageUrl = data.fileUrl;
-        this.dataForm.logo = data.fileUrl;
+        console.log("images:",data)
+        this.decriptImageUrl = data.fileUrl;
+        this.spu.decript.push(data.fileUrl);
+      });
+    },
+        //上传商品图集图片
+    uploadImagesImages(param) {
+      var fileObj = param.file;
+      // FormData 对象
+      var form = new FormData();
+      // 文件对象
+      form.append("file", fileObj);
+      this.$http({
+        url: this.$http.adornUrl("/upload/image/upload"),
+        method: "post",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        data: form,
+      }).then(({ data }) => {
+        this.imagesImageUrl = data.fileUrl;
+        this.spu.images.push(data.fileUrl);
       });
     },
   },

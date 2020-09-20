@@ -105,8 +105,8 @@ export default {
       this.dataListLoading = true;
       let param = {};
       Object.assign(param, this.dataForm, {
-        page: this.pageIndex,
-        limit: this.pageSize
+        pageNum: this.pageIndex,
+        pageSize: this.pageSize
       });
       this.$http({
         url: this.$http.adornUrl("/product/spuinfo/list"),
@@ -114,8 +114,8 @@ export default {
         params: this.$http.adornParams(param)
       }).then(({ data }) => {
         if (data && data.code === 0) {
-          this.dataList = data.page.list;
-          this.totalPage = data.page.totalCount;
+          this.dataList = data.list.list;
+          this.totalPage = data.list.total;
         } else {
           this.dataList = [];
           this.totalPage = 0;

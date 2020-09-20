@@ -146,18 +146,19 @@ export default {
         url: this.$http.adornUrl("/product/skuinfo/list"),
         method: "get",
         params: this.$http.adornParams({
-          page: this.pageIndex,
-          limit: this.pageSize,
+          pageNum: this.pageIndex,
+          pageSize: this.pageSize,
           key: this.dataForm.key,
-          catelogId: this.dataForm.catelogId,
+          catalogId: this.dataForm.catelogId,
           brandId: this.dataForm.brandId,
           min: this.dataForm.price.min,
           max: this.dataForm.price.max
         })
       }).then(({ data }) => {
         if (data && data.code === 0) {
-          this.dataList = data.page.list;
-          this.totalPage = data.page.totalCount;
+      
+          this.dataList = data.list.list;
+          this.totalPage = data.list.total;
         } else {
           this.dataList = [];
           this.totalPage = 0;

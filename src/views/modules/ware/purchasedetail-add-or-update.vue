@@ -75,8 +75,8 @@ export default {
         url: this.$http.adornUrl("/ware/wareinfo/list"),
         method: "get",
         params: this.$http.adornParams({
-          page: 1,
-          limit: 500
+          pageNum: 1,
+          pageSize: 500
         })
       }).then(({ data }) => {
         this.wareList = data.page.list;

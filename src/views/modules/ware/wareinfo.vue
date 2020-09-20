@@ -103,8 +103,8 @@
           url: this.$http.adornUrl('/ware/wareinfo/list'),
           method: 'get',
           params: this.$http.adornParams({
-            'page': this.pageIndex,
-            'limit': this.pageSize,
+            'pageNum': this.pageIndex,
+            'pageSize': this.pageSize,
             'key': this.dataForm.key
           })
         }).then(({data}) => {

@@ -10,7 +10,7 @@
             <brand-select style="width:160px"></brand-select>
           </el-form-item>
           <el-form-item label="状态">
-            <el-select style="width:160px" v-model="dataForm.status" clearable>
+            <el-select style="width:160px" v-model="dataForm.publishStatus" clearable>
               <el-option label="新建" :value="0"></el-option>
               <el-option label="上架" :value="1"></el-option>
               <el-option label="下架" :value="2"></el-option>
@@ -47,10 +47,10 @@ export default {
       catId: 0,
       catelogPath: [],
       dataForm: {
-        status: "",
+        publishStatus: "",
         key: "",
         brandId: 0,
-        catelogId: 0
+        catalogId: 0
       },
       catPathSub: null,
       brandIdSub: null
@@ -73,7 +73,7 @@ export default {
   //生命周期 - 挂载完成（可以访问DOM元素）
   mounted() {
     this.catPathSub = PubSub.subscribe("catPath", (msg, val) => {
-      this.dataForm.catelogId = val[val.length-1];
+      this.dataForm.catalogId = val[val.length-1];
     });
     this.brandIdSub = PubSub.subscribe("brandId", (msg, val) => {
       this.dataForm.brandId = val;

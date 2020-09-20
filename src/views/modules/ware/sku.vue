@@ -91,8 +91,8 @@ export default {
         url: this.$http.adornUrl("/ware/wareinfo/list"),
         method: "get",
         params: this.$http.adornParams({
-          page: 1,
-          limit: 500
+          pageNum: 1,
+          pageSize: 500
         })
       }).then(({ data }) => {
         this.wareList = data.page.list;
@@ -105,8 +105,8 @@ export default {
         url: this.$http.adornUrl("/ware/waresku/list"),
         method: "get",
         params: this.$http.adornParams({
-          page: this.pageIndex,
-          limit: this.pageSize,
+          pageNum: this.pageIndex,
+          pageSize: this.pageSize,
           skuId: this.dataForm.skuId,
           wareId: this.dataForm.wareId
         })

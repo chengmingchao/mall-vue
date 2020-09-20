@@ -52,7 +52,7 @@ export default {
       this.paths = this.catelogPath;
     },
     paths(v){
-      this.$emit("update:catelogPath",v);
+      // this.$emit("update:catelogPath",v);
       //还可以使用pubsub-js进行传值
       this.PubSub.publish("catPath",v);
     }
